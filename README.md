@@ -34,18 +34,19 @@ SARA is a smart voice assistant that leverages state-of-the-art open-source tech
 
 2. **Install System Dependencies**
 
-   PortAudio (for PyAudio):
+   - **PortAudio (for PyAudio):**
 
    - On macOS:
      ```
      brew install portaudio
      ```
    - On Ubuntu:
+
      ```
      sudo apt-get install portaudio19-dev
      ```
 
-   FFmpeg (for Whisper):
+   - **FFmpeg (for Whisper):**
 
    - On macOS:
      ```
