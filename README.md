@@ -36,11 +36,17 @@ SARA is a smart voice assistant that leverages state-of-the-art open-source tech
 
    PortAudio (for PyAudio):
 
-   - On macOS: `brew install portaudio`
-   - On Ubuntu: `sudo apt-get install portaudio19-dev`
-     FFmpeg (for Whisper):
-   - On macOS: `brew install ffmpeg`
-   - On Ubuntu: `sudo apt-get install ffmpeg`
+   - On macOS:
+     `brew install portaudio`
+   - On Ubuntu:
+     `sudo apt-get install portaudio19-dev`
+
+   FFmpeg (for Whisper):
+
+   - On macOS:
+     `brew install ffmpeg`
+   - On Ubuntu:
+     `sudo apt-get install ffmpeg`
    - On Windows, download and install FFmpeg from ffmpeg.org and add it to your PATH.
 
 ## File Structure
@@ -68,15 +74,9 @@ The server will start (by default on http://127.0.0.1:5000).
 
 2. **Open the Web UI:** Open your browser and navigate to http://127.0.0.1:5000.
 
-The home page displays a welcoming message.
+Home page: displays a welcoming message.
 
-The input field and buttons are fixed at the bottom.
-
-Once the user sends a message (typed or voice), the greeting is replaced by the chat box.
-
-User messages appear on the right, and Gemini responses appear on the left.
-
-The text input field auto-grows, and the chat box height adjusts so its bottom is near the input area.
+Chat page: The input field and buttons are fixed at the bottom. Once the user sends a message (typed or voice), the greeting is replaced by the chat box. User messages appear on the right, and Gemini responses appear on the left. The text input field auto-grows, and the chat box height adjusts so its bottom is near the input area.
 
 3. **Interact with SARA:**
 
