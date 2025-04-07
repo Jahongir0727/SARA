@@ -79,13 +79,19 @@ csci3280-project/
 python app.py
 ```
 
-    The server will start (by default on http://127.0.0.1:5000).
+2. **Open the Web UI:**
 
-2. **Open the Web UI:** Open your browser and navigate to http://127.0.0.1:5000.
+- Open your browser and navigate to http://127.0.0.1:5000.
 
-- Home page: displays a welcoming message.
+- The home page displays a welcoming message.
 
-- Chat page: The input field and buttons are fixed at the bottom. Once the user sends a message (typed or voice), the greeting is replaced by the chat box. User messages appear on the right, and Gemini responses appear on the left. The text input field auto-grows, and the chat box height adjusts so its bottom is near the input area.
+- The input field and buttons are fixed at the bottom.
+
+- Once the user sends a message (typed or voice), the greeting is replaced by the chat box.
+
+- User messages appear on the right, and Gemini responses appear on the left.
+
+- The text input field auto-grows, and the chat box height adjusts so its bottom is near the input area.
 
 3. **Interact with SARA:**
 
