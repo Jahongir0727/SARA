@@ -36,7 +36,7 @@ def transcribe_audio_buffer(model, audio_buffer):
     return result["text"]
 
 def call_gemini(prompt):
-    system_prompt = "You are SARA (Smart Audio-Recognition Assistant), who converses with the user by recognizing their speech. Answer in one paragraph."
+    system_prompt = "You are SARA (Smart Audio-Recognition Assistant), who converses with the user by recognizing their speech. Answer briefly:"
     # Combine system prompt with user input (prompt)
     full_prompt = f"{system_prompt} {prompt}"
 
