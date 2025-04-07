@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SARA - Smart Audio-Recognition Assistant</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <!-- Home Greeting Section -->
+  <div id="home" class="home-container">
+    <h1>👋 Welcome to SARA!</h1>
+    <p>Your Smart Audio-Recognition Assistant</p>
+  </div>
+
+  <!-- Chat Container (initially hidden) -->
+  <div id="chat-container" class="hidden">
+    <div id="chat-box"></div>
+  </div>
+
+  <!-- Input Area fixed at the bottom -->
+  <div id="input-area">
+    <textarea id="user-input" placeholder="Type your message..."></textarea>
+    <button id="submit-btn">Submit</button>
+    <button id="record-btn">🎙️ Voice Input</button>
+    <button id="stop-btn" disabled>⏹️ Finish</button>
+  </div>
+
+  <audio id="audio-player" src="/static/response.mp3"></audio>
+  <script src="/static/script.js"></script>
+</body>
+</html>
