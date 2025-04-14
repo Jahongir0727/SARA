@@ -1,8 +1,15 @@
 from flask import Flask, render_template, request, jsonify, send_from_directory
 import os
 from sara_utils import transcribe_audio_file, call_gemini, speak
+from collections import deque
 
 app = Flask(__name__)
+CHAT_HISTORY_MAX_LENGTH = 6  # Stores 3 exchanges (user + assistant)
+chat_history = deque(maxlen=CHAT_HISTORY_MAX_LENGTH)
+
+# Ensure static directory exists
+if not os.path.exists("static"):
+    os.makedirs("static")
 
 @app.route('/')
 def index():
@@ -12,9 +19,11 @@ def index():
 def handle_text():
     user_input = request.json.get('message', '')
     print(f"[User] {user_input}")
-    reply = call_gemini(user_input)
-    print(f"[SARA] {reply}")
-    speak(reply, "static/response.mp3")
+    reply, tone = call_gemini(list(chat_history), user_input)
+    print(f"[SARA] {reply} (Tone: {tone})")
+    chat_history.append({'role': 'user', 'parts': [{'text': user_input}]})
+    chat_history.append({'role': 'model', 'parts': [{'text': reply}]})
+    speak(reply, "static/response.mp3", tone)
     return jsonify({"response": reply})
 
 @app.route('/audio', methods=['POST'])
@@ -27,16 +36,17 @@ def audio_input():
         audio_path = "temp_audio.wav"
         audio_file.save(audio_path)
 
-        print("[INFO] Audio file received and saved.")
         transcription = transcribe_audio_file(audio_path)
         print(f"[Transcription] {transcription}")
 
         if transcription.strip() == "":
             return jsonify({"response": "[No speech detected]"}), 200
 
-        reply = call_gemini(transcription)
-        print(f"[SARA] {reply}")
-        speak(reply, "static/response.mp3")
+        reply, tone = call_gemini(list(chat_history), transcription)
+        print(f"[SARA] {reply} (Tone: {tone})")
+        chat_history.append({'role': 'user', 'parts': [{'text': transcription}]})
+        chat_history.append({'role': 'model', 'parts': [{'text': reply}]})
+        speak(reply, "static/response.mp3", tone)
         return jsonify({"transcription": transcription, "response": reply})
     except Exception as e:
         print("[ERROR]", e)
