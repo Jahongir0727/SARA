@@ -19,12 +19,16 @@ def index():
 def handle_text():
     user_input = request.json.get('message', '')
     print(f"[User] {user_input}")
+
     reply, tone, accent = call_gemini(list(chat_history), user_input)
     print(f"[SARA] {reply} (Tone: {tone}, Accent: {accent})")
+
     chat_history.append({'role': 'user', 'parts': [{'text': user_input}]})
     chat_history.append({'role': 'model', 'parts': [{'text': reply}]})
+
     speak(reply, "static/response.mp3", tone, accent)
-    return jsonify({"response": reply})
+
+    return jsonify({"response": reply, "tone": tone, "accent": accent})
 
 @app.route('/audio', methods=['POST'])
 def audio_input():
@@ -44,10 +48,13 @@ def audio_input():
 
         reply, tone, accent = call_gemini(list(chat_history), transcription)
         print(f"[SARA] {reply} (Tone: {tone}, Accent: {accent})")
+
         chat_history.append({'role': 'user', 'parts': [{'text': transcription}]})
         chat_history.append({'role': 'model', 'parts': [{'text': reply}]})
+
         speak(reply, "static/response.mp3", tone, accent)
-        return jsonify({"transcription": transcription, "response": reply})
+
+        return jsonify({"transcription": transcription, "response": reply, "tone": tone, "accent": accent})
     except Exception as e:
         print("[ERROR]", e)
         return jsonify({"error": str(e)}), 500
