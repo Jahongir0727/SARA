@@ -3,6 +3,7 @@ const userInput = document.getElementById("user-input");
 const submitBtn = document.getElementById("submit-btn");
 const recordBtn = document.getElementById("record-btn");
 const stopBtn = document.getElementById("stop-btn");
+const audioPlayer = document.getElementById("audio-player");
 
 const homeDiv = document.getElementById("home");
 const chatContainer = document.getElementById("chat-container");
@@ -26,13 +27,13 @@ function showChat() {
   chatContainer.classList.remove("hidden");
 }
 
-// Handle text submit
+// Handle text submission
 submitBtn.onclick = async (e) => {
   e.preventDefault();
   const text = userInput.value.trim();
   if (!text) return;
   addMessage("user", text);
-  userInput.value = ""; // Clear input
+  userInput.value = "";
   showChat();
 
   const res = await fetch("/text", {
@@ -40,8 +41,10 @@ submitBtn.onclick = async (e) => {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ message: text })
   });
+
   const data = await res.json();
   addMessage("bot", data.response);
+  showEmotionAnimation(data.tone);  // Updated
   playAudio();
 };
 
@@ -60,6 +63,7 @@ stopBtn.onclick = () => {
   mediaRecorder.stop();
   recordBtn.disabled = false;
   stopBtn.disabled = true;
+
   mediaRecorder.onstop = async () => {
     const blob = new Blob(audioChunks, { type: "audio/wav" });
     const formData = new FormData();
@@ -67,8 +71,10 @@ stopBtn.onclick = () => {
 
     const res = await fetch("/audio", { method: "POST", body: formData });
     const data = await res.json();
+
     if (data.transcription) addMessage("user", data.transcription);
     addMessage("bot", data.response);
+    showEmotionAnimation(data.tone);  // Updated
     showChat();
     playAudio();
   };
@@ -85,3 +91,18 @@ userInput.addEventListener("input", () => {
   userInput.style.height = "auto";
   userInput.style.height = userInput.scrollHeight + "px";
 });
+
+// Show emotion animation
+function showEmotionAnimation(tone) {
+  const player = document.getElementById('emotion-player');
+  const emotionLottieMap = {
+    happy: "https://lottie.host/c39b9f0c-5181-4932-b3c4-c6ab2d8160b1/i5FED40sdb.json",
+    sad: "https://lottie.host/012409ef-100f-4f0c-bc9f-c1f9dc66c601/fv2HAzueT0.json",
+    friendly: "https://lottie.host/290cb4cf-3c2c-4276-9d46-ec4fd57d9c2b/uvZugZxoKV.json",
+    thinking: "https://lottie.host/fa9bf99b-d611-46a8-b73d-2eb48d54ae08/bQiaozQwuq.json",
+    angry: "https://lottie.host/3e4b40df-0e7f-423d-896e-0f29dca82dfe/Bykvs1Jisb.json"
+  };
+  const selectedTone = tone || "thinking";
+  const animationUrl = emotionLottieMap[selectedTone] || emotionLottieMap["thinking"];
+  player.load(animationUrl);
+}

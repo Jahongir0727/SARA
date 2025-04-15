@@ -26,22 +26,52 @@ body {
 
 /* Chat Container */
 #chat-container {
-  width: 80%;
-  max-width: 1000px;
-  margin: 0 auto;  /* center horizontally */
-  padding-bottom: 25px; /* slight padding at bottom */
+  width: 100%;
+  max-width: 100%;
+  position: relative;
+  padding-bottom: 25px;
 }
 
+/* Flex Layout */
+#chat-inner {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  position: relative;
+}
+
+/* Chat Box */
 #chat-box {
   background: #fff;
   border: 1px solid #ccc;
   border-radius: 10px;
   padding: 15px;
-  height: 520px;  /* bigger chat box so bottom is closer to input field */
+  height: 520px;
   overflow-y: auto;
-  margin: 20px auto 0; /* smaller top margin to sit lower */
+  margin-top: 20px;
   display: flex;
   flex-direction: column;
+  width: 900px;
+  z-index: 1;
+}
+
+/* Emotion Animation Container */
+#emotion-indicator-container {
+  position: absolute;
+  left: calc(50% - 900px / 2 - 180px); /* update 700px -> 900px */
+  top: 430px;
+  width: 150px;
+  height: 150px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+}
+
+
+#emotion-animation {
+  width: 130px;
+  height: 130px;
 }
 
 /* Message Bubbles */
@@ -95,7 +125,7 @@ button {
   padding: 8px 12px;
   font-size: 16px;
   cursor: pointer;
-  height: 40px;  /* Fixed height for buttons */
+  height: 40px;
   flex-shrink: 0;
 }
 

@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <title>SARA - Smart Audio-Recognition Assistant</title>
   <link rel="stylesheet" href="/static/style.css">
+  <!-- Load Lottie Web Component -->
+  <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
 </head>
 <body>
   <!-- Home Greeting Section -->
@@ -12,10 +14,24 @@
     <p>Your Smart Audio-Recognition Assistant</p>
   </div>
 
-  <!-- Chat Container (initially hidden) -->
-  <div id="chat-container" class="hidden">
-    <div id="chat-box"></div>
-  </div>
+<!-- Chat Container (centered) -->
+<div id="chat-container" class="hidden">
+    <div id="chat-inner">
+      <!-- Emotion Animation -->
+      <div id="emotion-indicator-container">
+        <dotlottie-player id="emotion-player"
+          src="https://lottie.host/fa9bf99b-d611-46a8-b73d-2eb48d54ae08/bQiaozQwuq.json"
+          background="transparent" speed="1" loop autoplay
+          style="width: 130px; height: 130px">
+        </dotlottie-player>
+      </div>
+
+      <!-- Chat Box -->
+      <div id="chat-box"></div>
+    </div>
+</div>
+  
+  
 
   <!-- Input Area fixed at the bottom -->
   <div id="input-area">
