@@ -19,11 +19,11 @@ def index():
 def handle_text():
     user_input = request.json.get('message', '')
     print(f"[User] {user_input}")
-    reply, tone = call_gemini(list(chat_history), user_input)
-    print(f"[SARA] {reply} (Tone: {tone})")
+    reply, tone, accent = call_gemini(list(chat_history), user_input)
+    print(f"[SARA] {reply} (Tone: {tone}, Accent: {accent})")
     chat_history.append({'role': 'user', 'parts': [{'text': user_input}]})
     chat_history.append({'role': 'model', 'parts': [{'text': reply}]})
-    speak(reply, "static/response.mp3", tone)
+    speak(reply, "static/response.mp3", tone, accent)
     return jsonify({"response": reply})
 
 @app.route('/audio', methods=['POST'])
@@ -42,11 +42,11 @@ def audio_input():
         if transcription.strip() == "":
             return jsonify({"response": "[No speech detected]"}), 200
 
-        reply, tone = call_gemini(list(chat_history), transcription)
-        print(f"[SARA] {reply} (Tone: {tone})")
+        reply, tone, accent = call_gemini(list(chat_history), transcription)
+        print(f"[SARA] {reply} (Tone: {tone}, Accent: {accent})")
         chat_history.append({'role': 'user', 'parts': [{'text': transcription}]})
         chat_history.append({'role': 'model', 'parts': [{'text': reply}]})
-        speak(reply, "static/response.mp3", tone)
+        speak(reply, "static/response.mp3", tone, accent)
         return jsonify({"transcription": transcription, "response": reply})
     except Exception as e:
         print("[ERROR]", e)
