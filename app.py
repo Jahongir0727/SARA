@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify, send_from_directory
 import os
-from sara_utils import transcribe_audio_file, call_gemini, speak
+from sara_utils import transcribe_audio_file, call_gemini, speak, handle_command
 from collections import deque
 
 app = Flask(__name__)
@@ -19,6 +19,14 @@ def index():
 def handle_text():
     user_input = request.json.get('message', '')
     print(f"[User] {user_input}")
+
+    # Check if the input qualifies as a command:
+    cmd_result, tone, accent = handle_command(user_input)
+    if cmd_result is not None:
+        chat_history.append({'role': 'user', 'parts': [{'text': user_input}]})
+        chat_history.append({'role': 'model', 'parts': [{'text': cmd_result}]})
+        speak(cmd_result, "static/response.mp3", tone, accent)
+        return jsonify({"response": cmd_result, "tone": tone, "accent": accent})
 
     reply, tone, accent = call_gemini(list(chat_history), user_input)
     print(f"[SARA] {reply} (Tone: {tone}, Accent: {accent})")
@@ -46,6 +54,13 @@ def audio_input():
         if transcription.strip() == "":
             return jsonify({"response": "[No speech detected]"}), 200
 
+        cmd_result, tone, accent = handle_command(transcription)
+        if cmd_result is not None:
+            chat_history.append({'role': 'user', 'parts': [{'text': transcription}]})
+            chat_history.append({'role': 'model', 'parts': [{'text': cmd_result}]})
+            speak(cmd_result, "static/response.mp3", tone, accent)
+            return jsonify({"transcription": transcription, "response": cmd_result, "tone": tone, "accent": accent})
+        
         reply, tone, accent = call_gemini(list(chat_history), transcription)
         print(f"[SARA] {reply} (Tone: {tone}, Accent: {accent})")
 
