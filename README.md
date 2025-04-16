@@ -1,28 +1,51 @@
 # SARA: Smart Audio-Recognition Assistant
 
-SARA is a smart voice assistant that leverages state-of-the-art open-source technologies to provide a seamless conversational experience through a web-based user interface. It integrates:
+SARA is a smart voice assistant that leverages cutting-edge open-source technologies to deliver a seamless conversational experience through a modern web-based user interface. SARA integrates multiple modules to enable natural conversation, command execution, and dynamic emotional responses.
 
-- **ASR (Automatic Speech Recognition):** Uses [Whisper](https://github.com/openai/whisper) to transcribe spoken language into text.
-- **Conversational AI:** Calls the Gemini 2.0 Flash API to generate brief, intelligent responses based on user input. A system prompt is included with every request to remind Gemini of SARA’s identity.
-- **TTS (Text-to-Speech):** Uses Google TTS (gTTS) to convert Gemini's responses into audible speech, which is played back via the web interface.
+## Core Functionalities
 
-## Features
+- **ASR (Automatic Speech Recognition):**  
+  Uses [Whisper](https://github.com/openai/whisper) to transcribe spoken language from your computer’s microphone into text.
 
-- **Real Voice Input:**  
-  Users can click the “Voice Input” button to record speech from their computer's microphone. When they click “Finish,” the audio is sent to the backend where Whisper transcribes it.
+- **Conversational AI:**  
+  Communicates with the Gemini 2.0 Flash API to generate short, intelligent responses. A detailed system prompt guides responses to be in an appropriate tone (professional, friendly, sad, happy, angry, or even flirty) and optionally switches accents when requested.
 
-- **Dynamic Text Input:**  
-  Users can also type their messages. The text input field auto-grows in height as more text is entered, while the buttons maintain a fixed height.
+- **TTS (Text-to-Speech):**  
+  Utilizes Google TTS (gTTS via Google Cloud’s Text-to-Speech API) to convert Gemini's responses into natural-sounding audio, dynamically adjusted by tone and accent.
 
-- **Intuitive Chat UI:**
+- **Dynamic UI with Emotion Animation:**  
+  SARA’s web interface features a clean, centered chat box where:
+  - User messages appear right-aligned.
+  - Gemini responses appear left-aligned.
+  - An emotion indicator (using Lottie animations) shows a visual cue based on the detected tone of the response.
+  - The input field auto-grows as you type.
 
-  - The home page displays a pleasant greeting (with an emoji and a pastel gradient background).
-  - Once a message is sent (via text or voice), the greeting is replaced by a centered chat box.
-  - All user messages are right-aligned and all Gemini responses are left-aligned, similar to popular messaging apps.
-  - Message bubbles dynamically adjust their width based on the content.
+## Advanced Command Handling
 
-- **Real-Time Transcription & TTS Response:**  
-  After transcribing the user’s speech, SARA queries the Gemini API (with a system prompt) and displays the response in the chat. The Gemini response is converted to speech via Google TTS and played back automatically.
+In addition to regular conversation, SARA intelligently detects and executes a variety of commands embedded in natural language. Supported commands include:
+
+- **Search Command:**  
+  When the user includes "search for" in their input, SARA extracts the key query—removing extraneous trailing words like "for me", "please", or "now"—and opens your default browser with a Google search.
+
+  _Example:_  
+  _User:_ "Can you search for the busiest airports for me?"  
+  _Response:_ "Searching for the busiest airports in your browser."
+
+- **Time Command:**  
+  SARA can provide the current time. If a location is specified (e.g., "time in New York"), the response includes that location.
+
+  _Example:_  
+  _User:_ "What is the time in New York now?"  
+  _Response:_ "The current time in New York is 05:00 PM."
+
+- **Weather Command:**  
+  When a user asks about the weather (e.g., "weather in Hong Kong"), SARA retrieves real-time weather data from OpenWeatherMap and responds accordingly.
+
+- **Note Command:**  
+  Input beginning with "take a note" causes SARA to append the note to a text file.
+
+- **Play Music Command:**  
+  If the message contains "play music" anywhere, SARA opens Spotify (on Mac, using the `open` command).
 
 ## Installation
 
@@ -64,6 +87,7 @@ SARA is a smart voice assistant that leverages state-of-the-art open-source tech
 csci3280-project/
 ├── app.py                # Flask backend for the web UI
 ├── sara_utils.py         # Utility functions: ASR (Whisper), Gemini API call, and TTS (gTTS)
+├── requirements.txt
 ├── templates/
 │   └── index.html        # HTML for the user interface
 └── static/
@@ -81,22 +105,54 @@ python app.py
 
 2. **Open the Web UI:**
 
-- Open your browser and navigate to http://127.0.0.1:5000.
+- Navigate your browser to http://127.0.0.1:5000.
 
-- The home page displays a welcoming message.
+- The home page will display a welcoming message with a background animation.
 
-- The input field and buttons are fixed at the bottom.
-
-- Once the user sends a message (typed or voice), the greeting is replaced by the chat box.
-
-- User messages appear on the right, and Gemini responses appear on the left.
-
-- The text input field auto-grows, and the chat box height adjusts so its bottom is near the input area.
+- The chat interface (with a fixed-width chat box and a left-side emotion animation indicator) appears once a message is sent.
 
 3. **Interact with SARA:**
 
-- Text Input: Type your message and press Submit. The message will be displayed and SARA’s response will be shown and played.
+- Text Input:  
+  Type your message and press Submit. Your text appears right-aligned in the chat box, and SARA’s response (with an appropriate tone and accent) appears on the left, accompanied by a matching emotion animation.
 
-- Voice Input: Click Voice Input to start recording, then click Finish to stop recording and send the audio. The transcribed text and SARA’s response will be displayed and played.
+- Voice Input:  
+  Click Voice Input to record your speech, then click Finish. SARA transcribes your voice, processes the input, and responds with text and audio.
 
-4. **Exit:** Press Ctrl+C in the terminal to stop the Flask server.
+- Advanced Commands:
+
+  - Ask, "What's the time in New York now?" to get a time response with the location.
+
+  - Say "Search for the busiest airports for me" to trigger a browser search.
+
+  - Ask about the weather or request to play music, and SARA will execute those commands.
+
+4. **Exit:**  
+   Press Ctrl+C in the terminal to stop the Flask server.
+
+## Additional Notes
+
+- Emotion Animation:  
+  The web UI includes a Lottie-based emotion indicator that dynamically updates based on SARA’s tone.
+
+- Command Handling:  
+  SARA uses simple regex-based matching to detect commands within natural language input, making responses more intuitive even when commands are embedded in questions.
+
+- Customization:  
+  TTS parameters and Gemini response handling support multiple tones (professional, friendly, sad, happy, angry, flirty) and accents (American, British, Australian, Indian).
+
+## Acknowledgments
+
+[OpenAI Whisper] (https://github.com/openai/whisper)
+
+[Google Cloud Text-to-Speech] (https://cloud.google.com/text-to-speech)
+
+[Gemini 2.0 Flash API] (https://ai.google.dev/gemini-api/docs/models)
+
+[LottieFiles] (https://lottiefiles.com/)
+
+[PyAudio] (https://pypi.org/project/PyAudio/)
+
+[webrtcvad] (https://github.com/wiseman/py-webrtcvad)
+
+[Flask] (https://github.com/pallets/flask)
