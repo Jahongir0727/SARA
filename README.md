@@ -156,3 +156,5 @@ python app.py
 [webrtcvad] (https://github.com/wiseman/py-webrtcvad)
 
 [Flask] (https://github.com/pallets/flask)
+
+[OpenWeatherMap] (https://openweathermap.org/)
