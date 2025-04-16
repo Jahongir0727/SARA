@@ -11,7 +11,7 @@ SARA is a smart voice assistant that leverages cutting-edge open-source technolo
   Communicates with the Gemini 2.0 Flash API to generate short, intelligent responses. A detailed system prompt guides responses to be in an appropriate tone (professional, friendly, sad, happy, angry, or even flirty) and optionally switches accents when requested.
 
 - **TTS (Text-to-Speech):**  
-  Utilizes Google TTS (gTTS via Google Cloud’s Text-to-Speech API) to convert Gemini's responses into natural-sounding audio, dynamically adjusted by tone and accent.
+  Utilizes Google Cloud’s Text-to-Speech API to convert Gemini's responses into natural-sounding audio, dynamically adjusted by tone and accent.
 
 - **Dynamic UI with Emotion Animation:**  
   SARA’s web interface features a clean, centered chat box where:
@@ -28,8 +28,8 @@ In addition to regular conversation, SARA intelligently detects and executes a v
   When the user includes "search for" in their input, SARA extracts the key query—removing extraneous trailing words like "for me", "please", or "now"—and opens your default browser with a Google search.
 
   _Example:_  
-  _User:_ "Can you search for the busiest airports for me?"  
-  _Response:_ "Searching for the busiest airports in your browser."
+  _User:_ "Can you search for the busiest airports in the world for me?"  
+  _Response:_ "Searching for the busiest airports in the world in your browser."
 
 - **Time Command:**  
   SARA can provide the current time. If a location is specified (e.g., "time in New York"), the response includes that location.
@@ -143,18 +143,18 @@ python app.py
 
 ## Acknowledgments
 
-[OpenAI Whisper] (https://github.com/openai/whisper)
+[OpenAI Whisper](https://github.com/openai/whisper)
 
-[Google Cloud Text-to-Speech] (https://cloud.google.com/text-to-speech)
+[Google Cloud Text-to-Speech](https://cloud.google.com/text-to-speech)
 
-[Gemini 2.0 Flash API] (https://ai.google.dev/gemini-api/docs/models)
+[Gemini 2.0 Flash API](https://ai.google.dev/gemini-api/docs/models)
 
-[LottieFiles] (https://lottiefiles.com/)
+[LottieFiles](https://lottiefiles.com/)
 
-[PyAudio] (https://pypi.org/project/PyAudio/)
+[PyAudio](https://pypi.org/project/PyAudio/)
 
-[webrtcvad] (https://github.com/wiseman/py-webrtcvad)
+[webrtcvad](https://github.com/wiseman/py-webrtcvad)
 
-[Flask] (https://github.com/pallets/flask)
+[Flask](https://github.com/pallets/flask)
 
-[OpenWeatherMap] (https://openweathermap.org/)
+[OpenWeatherMap](https://openweathermap.org/)
