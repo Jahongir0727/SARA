@@ -1,14 +1,7 @@
 Flask
 whisper
-webrtcvad
-pyaudio
-numpy
-pygame
 requests
 google-cloud-texttospeech
 pytz
 geopy
 timezonefinder
-gTTS
-playsound
-soundfile
