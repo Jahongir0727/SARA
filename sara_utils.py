@@ -131,7 +131,7 @@ def speak(text, filename="static/response.mp3", tone="professional", accent="ame
         tone_settings = {
             "professional": {"speaking_rate": 1.0, "pitch": 0.0},
             "friendly": {"speaking_rate": 1.1, "pitch": 2.0},
-            "sad": {"speaking_rate": 0.7, "pitch": -5.0},
+            "sad": {"speaking_rate": 0.8, "pitch": -5.0},
             "happy": {"speaking_rate": 1.15, "pitch": 4.0},
             "angry": {"speaking_rate": 1.2, "pitch": 2.5},
             "flirty": {"speaking_rate": 1.05, "pitch": 3.5}
@@ -213,7 +213,7 @@ def handle_command(user_input):
             return f"Search failed: {e}", "professional", CURRENT_ACCENT
 
     # Time command with automatic geocoding and timezone lookup
-    if "time" in lower_input:
+    if "the time in" in lower_input:
         match = re.search(r'time in ([a-z\s]+)', lower_input)
         if match:
             raw_loc = match.group(1).strip()
