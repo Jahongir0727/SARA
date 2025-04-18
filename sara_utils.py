@@ -181,7 +181,7 @@ def handle_command(user_input):
     if search_match:
         query = search_match.group(1).strip()
         # Remove common extraneous phrases and trailing punctuation from the query
-        query = re.sub(r'\b(for me|please|now)\b', '', query).strip()
+        query = re.sub(r'\b(for me|please|now|in the browser|in browser)\b', '', query).strip()
         query = query.rstrip('.?!').strip()
         url = f"https://www.google.com/search?q={query.replace(' ', '+')}"
         try:
@@ -190,16 +190,33 @@ def handle_command(user_input):
         except Exception as e:
             return f"Failed to open browser: {e}", "professional", CURRENT_ACCENT
         
+    # Common normalization map near the top of your file
+    LOCATION_MAP = {
+        "hk": "Hong Kong",
+        "usa": "Washington, D.C.",    # default for USA
+        "us":  "Washington, D.C.",
+        "uk":  "London",              # default for UK
+        "nyc": "New York City",
+        "la":  "Los Angeles",
+        "sf":  "San Francisco",
+    }
+
     # Time command with location (e.g., "time in new york")
     if "time" in lower_input:
         # Look for a phrase like "time in <location>" using regex.
         match = re.search(r'time in ([a-z\s]+)', lower_input)
         if match:
-            location = match.group(1).strip()
-            # Remove extra trailing words such as "now" or "today"
-            location = re.sub(r'\b(now|today)\b', '', location).strip()
+            raw_loc = match.group(1).strip()
+            raw_loc = re.sub(r'\b(now|today)\b', '', raw_loc).strip()
+            # Normalize
+            city = LOCATION_MAP.get(raw_loc.lower(), raw_loc.title())
             current_time = datetime.datetime.now().strftime("%I:%M %p")
-            return f"The current time in {location.title()} is {current_time}.", "professional", CURRENT_ACCENT
+            return (
+                f"The current time in {city} is {current_time}.",
+                "professional",
+                CURRENT_ACCENT
+            )
+
         elif "what's the time" in lower_input or "what is the time" in lower_input:
             current_time = datetime.datetime.now().strftime("%I:%M %p")
             return f"The current time is {current_time}.", "professional", CURRENT_ACCENT
@@ -222,31 +239,37 @@ def handle_command(user_input):
         except Exception as e:
             return f"Unable to open Spotify: {e}", "professional", CURRENT_ACCENT
 
-    # Weather command: if input contains "weather in"
+        # Weather command: if input contains "weather in"
     if "weather in" in lower_input:
         try:
-            # Use regex to extract location (letters and spaces only)
+            # Extract raw location (letters and spaces only)
             match = re.search(r'weather in\s+([a-z\s]+)', lower_input)
             if match:
-                location = match.group(1).strip()
-                # Remove trailing words such as "now" or "today"
-                location = re.sub(r'\b(now|today)\b.*$', '', location).strip()
-            else:
-                location = ""
-            if location:
-                OPENWEATHER_API_KEY = "d32f275d3b4d46fec855b7e37f40eb41"  # Replace with your key
-                url = f"http://api.openweathermap.org/data/2.5/weather?q={location}&appid={OPENWEATHER_API_KEY}&units=metric"
+                raw_loc = match.group(1).strip()
+                raw_loc = re.sub(r'\b(now|today)\b.*$', '', raw_loc).strip()
+                # Normalize
+                city = LOCATION_MAP.get(raw_loc.lower(), raw_loc.title())
+
+                OPENWEATHER_API_KEY = "d32f275d3b4d46fec855b7e37f40eb41"
+                url = (
+                    f"http://api.openweathermap.org/data/2.5/weather"
+                    f"?q={city.replace(' ', '+')}"
+                    f"&appid={OPENWEATHER_API_KEY}&units=metric"
+                )
                 r = requests.get(url)
                 data = r.json()
                 if data.get("cod") == 200:
                     temp = data["main"]["temp"]
                     description = data["weather"][0]["description"]
-                    return f"The current weather in {location.title()} is {description} with a temperature of {temp}°C.", "professional", CURRENT_ACCENT
+                    return (f"The current weather in {city} is {description} "
+                            f"with a temperature of {temp}°C."), "professional", CURRENT_ACCENT
                 else:
-                    return f"Could not retrieve weather data for {location}.", "professional", CURRENT_ACCENT
+                    return f"Could not retrieve weather data for {city}.", "professional", CURRENT_ACCENT
             else:
                 return "Please specify a location for the weather.", "professional", CURRENT_ACCENT
+
         except Exception as e:
             return f"Error fetching weather: {e}", "professional", CURRENT_ACCENT
+
 
     return None, None, None
