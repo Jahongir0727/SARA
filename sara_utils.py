@@ -199,25 +199,29 @@ def handle_command(user_input):
             return f"Search failed: {e}", "professional", CURRENT_ACCENT
 
     # 2) Time
-    if "time" in txt:
+    # Only match when user is asking for the time
+    if re.search(r"\b(?:what(?:'s| is) the time|current time|time in)\b", txt):
+        # First, do “time in <location>” if present
         m2 = re.search(r"time in ([a-z\s]+)", txt)
         if m2:
-            loc = re.sub(r"\b(now|today)\b", "", m2.group(1), flags=re.IGNORECASE).strip()
-            city = LOCATION_MAP.get(loc, loc.title())
+            raw = re.sub(r"\b(now|today)\b", "", m2.group(1), flags=re.IGNORECASE).strip()
+            city = LOCATION_MAP.get(raw, raw.title())
             try:
                 geo = Nominatim(user_agent="tz_app").geocode(city, exactly_one=True)
                 tf = TimezoneFinder()
                 tzstr = tf.timezone_at(lat=geo.latitude, lng=geo.longitude)
                 tz = pytz.timezone(tzstr)
-                ct = datetime.datetime.now(tz).strftime("%I:%M %p")
+                now_t = datetime.datetime.now(tz).strftime("%I:%M %p")
                 disp = tzstr.split("/")[-1].replace("_", " ")
-                return f"The current time in {disp} is {ct}.", "professional", CURRENT_ACCENT
-            except:
+                return f"The current time in {disp} is {now_t}.", "professional", CURRENT_ACCENT
+            except Exception:
                 fallback = datetime.datetime.now().strftime("%I:%M %p")
                 return f"The current time in {city} is {fallback}.", "professional", CURRENT_ACCENT
-        else:
-            now = datetime.datetime.now().strftime("%I:%M %p")
-            return f"The current time is {now}.", "professional", CURRENT_ACCENT
+
+        # Otherwise handle generic “what’s the time” or “current time”
+        now_local = datetime.datetime.now().strftime("%I:%M %p")
+        return f"The current time is {now_local}.", "professional", CURRENT_ACCENT
+
 
     # 3) Take a note
     m3 = re.match(r"^\s*take a note[,:]?\s*(.+)$", user_input, flags=re.IGNORECASE)
