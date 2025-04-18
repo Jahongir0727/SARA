@@ -6,6 +6,7 @@ import re
 import datetime
 import subprocess
 import webbrowser
+import platform
 
 # Set Google Cloud credentials
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "optical-pillar-456208-b7-f11a787d3a82.json"
@@ -165,32 +166,16 @@ def speak(text, filename="static/response.mp3", tone="professional", accent="ame
 
 def handle_command(user_input):
     """
-    Detect and execute commands.
-    Supported commands (case-insensitive) anywhere in the input:
-      - "what's the time" / "what is the time"
-      - "take a note" at start of message
-      - "play music" anywhere in the message
-      - "weather in <location>" anywhere in the message
-      - "search for <query>" anywhere in the message
+    Cross-platform command handler with OS-specific implementations.
+    Supported commands:
+    - Search, Time, Notes, Music, Weather
     """
     global CURRENT_ACCENT
     lower_input = user_input.lower().strip()
-    
-    # Search command: "search for <query>"
-    search_match = re.search(r'\bsearch for (.+)', lower_input)
-    if search_match:
-        query = search_match.group(1).strip()
-        # Remove common extraneous phrases and trailing punctuation from the query
-        query = re.sub(r'\b(for me|please|now|in the browser|in browser)\b', '', query).strip()
-        query = query.rstrip('.?!').strip()
-        url = f"https://www.google.com/search?q={query.replace(' ', '+')}"
-        try:
-            webbrowser.open(url)
-            return f"Searching for \"{query}\" in your browser.", "professional", CURRENT_ACCENT
-        except Exception as e:
-            return f"Failed to open browser: {e}", "professional", CURRENT_ACCENT
-        
-    # Common normalization map near the top of your file
+    system = platform.system().lower()
+    is_wsl = 'microsoft' in platform.uname().release.lower()
+
+    # Common normalization map
     LOCATION_MAP = {
         "hk": "Hong Kong",
         "usa": "Washington, D.C.",    # default for USA
@@ -201,75 +186,115 @@ def handle_command(user_input):
         "sf":  "San Francisco",
     }
 
-    # Time command with location (e.g., "time in new york")
+    # Search command - Cross-platform implementation
+    search_match = re.search(r'\bsearch for (.+)', lower_input)
+    if search_match:
+        query = search_match.group(1).strip()
+        query = re.sub(r'\b(for me|please|now|in the browser|in browser)\b', '', query).strip()
+        query = query.rstrip('.?!').strip()
+        url = f"https://www.google.com/search?q={requests.utils.quote(query)}"
+        
+        try:
+            if is_wsl:
+                subprocess.run(['cmd.exe', '/c', 'start', url], check=True)
+            elif system == 'windows':
+                subprocess.Popen(f'start {url}', shell=True)
+            elif system == 'darwin':
+                subprocess.Popen(['open', url])
+            else:
+                webbrowser.open_new_tab(url)
+            return f"Searching for \"{query}\"", "professional", CURRENT_ACCENT
+        except Exception as e:
+            return f"Search failed: {e}", "professional", CURRENT_ACCENT
+
+    # Time command with cross-platform timezone handling
     if "time" in lower_input:
-        # Look for a phrase like "time in <location>" using regex.
         match = re.search(r'time in ([a-z\s]+)', lower_input)
         if match:
             raw_loc = match.group(1).strip()
             raw_loc = re.sub(r'\b(now|today)\b', '', raw_loc).strip()
-            # Normalize
             city = LOCATION_MAP.get(raw_loc.lower(), raw_loc.title())
+            
+            try:
+                if is_wsl or system == 'windows':
+                    tz_command = ['tzutil', '/g']  # Windows timezone utility
+                    current_tz = subprocess.check_output(tz_command).decode().strip()
+                else:
+                    # Linux/Mac timezone handling
+                    current_tz = subprocess.check_output(['date', '+%Z']).decode().strip()
+                
+                current_time = datetime.datetime.now().strftime("%I:%M %p")
+                return f"Time in {city} ({current_tz}): {current_time}", "professional", CURRENT_ACCENT
+            except:
+                current_time = datetime.datetime.now().strftime("%I:%M %p")
+                return f"Time in {city}: {current_time}", "professional", CURRENT_ACCENT
+        else:
             current_time = datetime.datetime.now().strftime("%I:%M %p")
-            return (
-                f"The current time in {city} is {current_time}.",
-                "professional",
-                CURRENT_ACCENT
-            )
+            return f"Current time is {current_time}", "professional", CURRENT_ACCENT
 
-        elif "what's the time" in lower_input or "what is the time" in lower_input:
-            current_time = datetime.datetime.now().strftime("%I:%M %p")
-            return f"The current time is {current_time}.", "professional", CURRENT_ACCENT
-
-    # Note command (must start with "take a note")
+    # Note command - Cross-platform path handling
     if lower_input.startswith("take a note"):
         note = user_input[len("take a note"):].strip()
         try:
-            with open("notes.txt", "a") as f:
-                f.write(note + "\n")
-            return "I've taken your note in the notes.txt.", "professional", CURRENT_ACCENT
+            notes_path = os.path.expanduser("~/notes.txt")
+            with open(notes_path, "a", encoding='utf-8') as f:
+                f.write(f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}: {note}\n")
+            return "Note saved successfully", "professional", CURRENT_ACCENT
         except Exception as e:
-            return f"Failed to save your note: {e}", "professional", CURRENT_ACCENT
+            return f"Note failed: {e}", "professional", CURRENT_ACCENT
 
-    # Play music command: if input contains "play music" anywhere
+    # Play music command - Full OS support with fallbacks
     if "play music" in lower_input:
         try:
-            subprocess.Popen(["open", "-a", "Spotify"])
-            return "Sure, opening Spotify for you.", "friendly", CURRENT_ACCENT
+            if is_wsl:
+                # WSL -> Windows Spotify
+                subprocess.run(['cmd.exe', '/c', 'start', 'spotify:'], check=True)
+            elif system == 'windows':
+                subprocess.Popen(['start', 'spotify:'], shell=True)
+            elif system == 'darwin':
+                subprocess.Popen(["open", "-a", "Spotify"])
+            else:
+                # Linux with fallbacks
+                try:
+                    subprocess.Popen(["spotify"])
+                except FileNotFoundError:
+                    try:
+                        subprocess.Popen(["flatpak", "run", "com.spotify.Client"])
+                    except FileNotFoundError:
+                        webbrowser.open("https://music.youtube.com")
+            return "Launching music...", "friendly", CURRENT_ACCENT
         except Exception as e:
-            return f"Unable to open Spotify: {e}", "professional", CURRENT_ACCENT
+            return f"Music error: {e}", "professional", CURRENT_ACCENT
 
-    # Weather command: if input contains "weather in"
+    # Weather command - Improved location handling
     if "weather in" in lower_input:
         try:
-            # Extract raw location (letters and spaces only)
             match = re.search(r'weather in\s+([a-z\s]+)', lower_input)
             if match:
                 raw_loc = match.group(1).strip()
                 raw_loc = re.sub(r'\b(now|today)\b.*$', '', raw_loc).strip()
-                # Normalize
                 city = LOCATION_MAP.get(raw_loc.lower(), raw_loc.title())
 
                 OPENWEATHER_API_KEY = "d32f275d3b4d46fec855b7e37f40eb41"
                 url = (
                     f"http://api.openweathermap.org/data/2.5/weather"
-                    f"?q={city.replace(' ', '+')}"
+                    f"?q={requests.utils.quote(city)}"
                     f"&appid={OPENWEATHER_API_KEY}&units=metric"
                 )
-                r = requests.get(url)
-                data = r.json()
+                response = requests.get(url)
+                data = response.json()
+                
                 if data.get("cod") == 200:
                     temp = data["main"]["temp"]
                     description = data["weather"][0]["description"]
-                    return (f"The current weather in {city} is {description} "
-                            f"with a temperature of {temp}°C."), "professional", CURRENT_ACCENT
-                else:
-                    return f"Could not retrieve weather data for {city}.", "professional", CURRENT_ACCENT
-            else:
-                return "Please specify a location for the weather.", "professional", CURRENT_ACCENT
-
+                    return (
+                        f"Weather in {city}: {description}, {temp}°C",
+                        "professional",
+                        CURRENT_ACCENT
+                    )
+                return f"Weather unavailable for {city}", "professional", CURRENT_ACCENT
+            return "Specify location (e.g., 'weather in London')", "professional", CURRENT_ACCENT
         except Exception as e:
-            return f"Error fetching weather: {e}", "professional", CURRENT_ACCENT
-
+            return f"Weather error: {e}", "professional", CURRENT_ACCENT
 
     return None, None, None
