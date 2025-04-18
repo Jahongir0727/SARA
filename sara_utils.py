@@ -239,7 +239,7 @@ def handle_command(user_input):
         except Exception as e:
             return f"Unable to open Spotify: {e}", "professional", CURRENT_ACCENT
 
-        # Weather command: if input contains "weather in"
+    # Weather command: if input contains "weather in"
     if "weather in" in lower_input:
         try:
             # Extract raw location (letters and spaces only)
