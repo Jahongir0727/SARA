@@ -250,17 +250,38 @@ def handle_command(user_input):
             current_time = datetime.datetime.now().strftime("%I:%M %p")
             return f"The current time is {current_time}.", "professional", CURRENT_ACCENT
 
-    # Note command - Cross-platform path handling
-    if lower_input.startswith("take a note"):
-        note = user_input[len("take a note"):].strip()
+    # Note command — match at start, ignore case, optional colon/comma
+    note_match = re.match(
+        r'^\s*take a note[,:]?\s*(.+)$',
+        user_input,
+        flags=re.IGNORECASE
+    )
+    if note_match:
+        # 1) Grab everything after the first "take a note"
+        note_content = note_match.group(1).strip()
+
+        # 2) Remove any leading repeats of "take a note" or filler "for me"
+        note_content = re.sub(
+            r'^(?:(?:take a note|for me)[,:]?\s*)+',
+            '',
+            note_content,
+            flags=re.IGNORECASE
+        ).lstrip(',: ').strip()
+
         try:
             notes_path = os.path.expanduser("~/notes.txt")
-            with open(notes_path, "a", encoding='utf-8') as f:
-                f.write(f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}: {note}\n")
-            return "Note saved successfully", "professional", CURRENT_ACCENT
-        except Exception as e:
-            return f"Note failed: {e}", "professional", CURRENT_ACCENT
+            with open(notes_path, "a", encoding="utf-8") as f:
+                timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+                f.write(f"{timestamp}: {note_content}\n")
 
+            # 1. Updated response
+            return f"Your note has been saved to {notes_path}.", \
+                "professional", CURRENT_ACCENT
+
+        except Exception as e:
+            return f"Failed to save note: {e}", \
+                "professional", CURRENT_ACCENT
+        
     # Play music command - Full OS support with fallbacks
     if "play music" in lower_input:
         try:
